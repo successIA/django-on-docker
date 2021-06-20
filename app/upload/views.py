@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage
-
+from django.http.response import HttpResponse
 
 def image_upload(request):
     if request.method == "POST" and request.FILES["image_file"]:
@@ -13,3 +13,21 @@ def image_upload(request):
             "image_url": image_url
         })
     return render(request, "upload.html")
+
+
+def visitor_ip_address(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+    print('x_forwarded_for:', x_forwarded_for)
+
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    
+    
+    print('X_FORWARDED_FOR:', x_forwarded_for)
+    print('IP:', ip)
+
+    msg = f'Your ip is {ip}. Visiting from {x_forwarded_for}'
+    return HttpResponse(msg)
