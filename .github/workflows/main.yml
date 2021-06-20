@@ -47,7 +47,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose build
+          docker-compose -f docker-compose.ci.yml build
 
       - name: Push images
         run: |
