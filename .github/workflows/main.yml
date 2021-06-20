@@ -22,8 +22,8 @@ jobs:
 
       - name: Set image environment variables
         run: |
-          echo "WEB_IMAGE=${{ env.IMAGE_REPOSITORY }}/web" >> $GITHUB_ENV
-          echo "NGINX_IMAGE=${{ env.IMAGE_REPOSITORY }}/nginx" >> $GITHUB_ENV
+          echo "WEB_IMAGE=docker.pkg.github.com/${{ env.IMAGE_REPOSITORY }}/web" >> $GITHUB_ENV
+          echo "NGINX_IMAGE=docker.pkg.github.com/${{ env.IMAGE_REPOSITORY }}/nginx" >> $GITHUB_ENV
 
       - name: Testing string substitution
         run: |
