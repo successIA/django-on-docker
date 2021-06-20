@@ -38,7 +38,8 @@ services:
       - POSTGRES_DB=hello_django_prod
 
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
       cache_from:
         - "${NGINX_IMAGE}"
     image: "${NGINX_IMAGE}"
