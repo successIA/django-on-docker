@@ -4,9 +4,9 @@ on:
     branches:
       - master
 
-env:
-  WEB_IMAGE: docker.pkg.github.com/$GITHUB_REPOSITORY/web
-  NGINX_IMAGE: docker.pkg.github.com/$GITHUB_REPOSITORY/nginx
+# env:
+#   WEB_IMAGE: docker.pkg.github.com/$GITHUB_REPOSITORY/web
+#   NGINX_IMAGE: docker.pkg.github.com/$GITHUB_REPOSITORY/nginx
 
 jobs:
   build:
@@ -15,6 +15,15 @@ jobs:
     steps:
       - name: Checkout master
         uses: actions/checkout@v1
+
+      - name: Format repository name
+        run: |
+          echo IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+
+      - name: Set image environment variables
+        run: |
+          echo "WEB_IMAGE=${{ env.IMAGE_REPOSITORY }}/web" >> $GITHUB_ENV
+          echo "NGINX_IMAGE=${{ env.IMAGE_REPOSITORY }}/nginx" >> $GITHUB_ENV
 
       - name: Testing string substitution
         run: |
