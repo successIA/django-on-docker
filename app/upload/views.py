@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage
 from django.http.response import HttpResponse
 
+
 def image_upload(request):
     if request.method == "POST" and request.FILES["image_file"]:
         image_file = request.FILES["image_file"]
@@ -24,7 +25,6 @@ def visitor_ip_address(request):
         ip = x_forwarded_for.split(',')[0]
     else:
         ip = request.META.get('REMOTE_ADDR')
-    
     
     print('X_FORWARDED_FOR:', x_forwarded_for)
     print('IP:', ip)
