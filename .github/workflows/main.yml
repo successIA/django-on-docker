@@ -1,38 +1,74 @@
-name: Deployment From Github To AWS
+name: Contiuous Integration
 on:
   push:
     branches:
       - master
+
+env:
+  WEB_IMAGE: docker.pkg.github.com/$GITHUB_REPOSITORY/web
+  NGINX_IMAGE: docker.pkg.github.com/$GITHUB_REPOSITORY/nginx
+
 jobs:
-  deploy:
+  build:
+    name: Build Docker Images
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Latest Repo
-        uses: actions/checkout@master
+      - name: Checkout master
+        uses: actions/checkout@v1
 
-      - name: Generate Deployment Package
-        run: zip -r deploy.zip . -x '*.git*'
+      # - name: Set environment variables
+      #   run: |
+      #     echo ::set-env name=WEB_IMAGE::${{ env.WEB_IMAGE }}
+      #     echo ::set-env name=NGINX_IMAGE::${{ env.NGINX_IMAGE }}
 
-      - name: Get timestamp
-        uses: gerred/actions/current-time@master
-        id: current-time
+      - name: Log in to GitHub Packages
+        run: echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run string replace
-        uses: frabert/replace-string-action@master
-        id: format-time
-        with:
-          pattern: '[:\.]+'
-          string: "${{ steps.current-time.outputs.time }}"
-          replace-with: "-"
-          flags: "g"
+      - name: Pull images
+        run: |
+          docker pull ${{ env.WEB_IMAGE }} || true
+          docker pull ${{ env.NGINX_IMAGE }} || true
 
-      - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v14
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: django-on-docker
-          environment_name: django-on-docker-env
-          version_label: "django-on-docker-${{ steps.format-time.outputs.replaced }}"
-          region: us-west-2
-          deployment_package: deploy.zip
+      - name: Build images
+        run: |
+          docker-compose build
+
+      - name: Push images
+        run: |
+          docker push ${{ env.WEB_IMAGE }}
+          docker push ${{ env.NGINX_IMAGE }}
+
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Latest Repo
+  #       uses: actions/checkout@master
+
+  #     - name: Generate Deployment Package
+  #       run: zip -r deploy.zip . -x '*.git*'
+
+  #     - name: Get timestamp
+  #       uses: gerred/actions/current-time@master
+  #       id: current-time
+
+  #     - name: Run string replace
+  #       uses: frabert/replace-string-action@master
+  #       id: format-time
+  #       with:
+  #         pattern: '[:\.]+'
+  #         string: "${{ steps.current-time.outputs.time }}"
+  #         replace-with: "-"
+  #         flags: "g"
+
+  #     - name: Deploy to EB
+  #       uses: einaregilsson/beanstalk-deploy@v14
+  #       with:
+  #         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         application_name: django-on-docker
+  #         environment_name: django-on-docker-env
+  #         version_label: "django-on-docker-${{ steps.format-time.outputs.replaced }}"
+  #         region: us-west-2
+  #         deployment_package: deploy.zip

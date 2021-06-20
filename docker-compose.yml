@@ -5,6 +5,9 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile.prod
+      cache_from:
+        - "${WEB_IMAGE}"
+    image: "${WEB_IMAGE}"
     command: gunicorn hello_django.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/app/web/staticfiles
@@ -36,6 +39,9 @@ services:
 
   nginx:
     build: ./nginx
+    cache_from:
+      - "${NGINX_IMAGE}"
+    image: "${NGINX_IMAGE}"
     volumes:
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/mediafiles
