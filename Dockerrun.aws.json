@@ -2,6 +2,6 @@
     "AWSEBDockerrunVersion": "3",
     "Authentication": {
       "bucket": "github-packages-credentials",
-      "key": ".dockercfg"
+      "key": "dockercfg"
     }
   }   
