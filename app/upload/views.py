@@ -28,6 +28,9 @@ def visitor_ip_address(request):
     
     print('X_FORWARDED_FOR:', x_forwarded_for)
     print('IP:', ip)
+    print('META:', request.META)
+    remote_host = request.META['REMOTE_HOST']
+    http_host = request.META['HTTP_HOST']
 
-    msg = f'Your ip is {ip}. Visiting from {x_forwarded_for}'
+    msg = f'Your ip is {ip}. Remote Host: {remote_host}, Http host: {http_host}'
     return HttpResponse(msg)
