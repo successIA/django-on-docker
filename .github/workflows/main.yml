@@ -54,10 +54,10 @@ jobs:
         run: |
           docker-compose -f docker-compose.ci.yml run --rm web python manage.py test
 
-      # - name: Push images
-      #   run: |
-      #     docker push ${{ env.WEB_IMAGE }}
-      #     docker push ${{ env.NGINX_PROXY_IMAGE }}
+      - name: Push images
+        run: |
+          docker push ${{ env.WEB_IMAGE }}
+          docker push ${{ env.NGINX_PROXY_IMAGE }}
 
   deploy:
     name: Prepare and deploy images to AWS Elastic Beanstalk
