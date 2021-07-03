@@ -52,7 +52,7 @@ jobs:
 
       - name: Run test
         run: |
-          docker-compose -f docker-compose.ci.yml run --rmi web python manage.py test
+          docker-compose -f docker-compose.ci.yml run --rm web python manage.py test
 
       # - name: Push images
       #   run: |
