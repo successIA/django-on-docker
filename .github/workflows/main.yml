@@ -3,10 +3,11 @@ on:
   push:
     branches:
       - master
+      - develop
 
 # env:
 #   WEB_IMAGE: docker.pkg.github.com/$GITHUB_REPOSITORY/web
-#   NGINX_IMAGE: docker.pkg.github.com/$GITHUB_REPOSITORY/nginx
+#   NGINX_PROXY_IMAGE: docker.pkg.github.com/$GITHUB_REPOSITORY/nginx
 
 jobs:
   build:
@@ -23,17 +24,17 @@ jobs:
       - name: Set image environment variables
         run: |
           echo "WEB_IMAGE=docker.pkg.github.com/${{ env.IMAGE_REPOSITORY }}/web" >> $GITHUB_ENV
-          echo "NGINX_IMAGE=docker.pkg.github.com/${{ env.IMAGE_REPOSITORY }}/nginx" >> $GITHUB_ENV
+          echo "NGINX_PROXY_IMAGE=docker.pkg.github.com/${{ env.IMAGE_REPOSITORY }}/nginx" >> $GITHUB_ENV
 
       - name: Testing string substitution
         run: |
           echo ${{ env.WEB_IMAGE }}
-          echo ${{ env.NGINX_IMAGE }}
+          echo ${{ env.NGINX_PROXY_IMAGE }}
 
       - name: Set environment variables
         run: |
           echo "WEB_IMAGE=${{ env.WEB_IMAGE }}" >> $GITHUB_ENV
-          echo "NGINX_IMAGE=${{ env.NGINX_IMAGE }}" >> $GITHUB_ENV
+          echo "NGINX_PROXY_IMAGE=${{ env.NGINX_PROXY_IMAGE }}" >> $GITHUB_ENV
 
       - name: Log in to GitHub Packages
         run: echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_ACTOR} --password-stdin docker.pkg.github.com
@@ -43,21 +44,26 @@ jobs:
       - name: Pull images
         run: |
           docker pull ${{ env.WEB_IMAGE }} || true
-          docker pull ${{ env.NGINX_IMAGE }} || true
+          docker pull ${{ env.NGINX_PROXY_IMAGE }} || true
 
       - name: Build images
         run: |
           docker-compose -f docker-compose.ci.yml build
 
-      - name: Push images
+      - name: Run test
         run: |
-          docker push ${{ env.WEB_IMAGE }}
-          docker push ${{ env.NGINX_IMAGE }}
+          docker-compose -f docker-compose.ci.yml run --rmi web python manage.py test
+
+      # - name: Push images
+      #   run: |
+      #     docker push ${{ env.WEB_IMAGE }}
+      #     docker push ${{ env.NGINX_PROXY_IMAGE }}
 
   deploy:
     name: Prepare and deploy images to AWS Elastic Beanstalk
     runs-on: ubuntu-latest
     needs: build
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout Latest Repo
         uses: actions/checkout@master
