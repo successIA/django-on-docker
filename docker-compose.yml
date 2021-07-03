@@ -25,6 +25,8 @@ services:
       - SQL_HOST=db
       - SQL_PORT=5432
       - DATABASE=postgres
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - VIRTUAL_PORT=8000
 
     depends_on:
       - db
@@ -37,15 +39,29 @@ services:
       - POSTGRES_PASSWORD=hello_django
       - POSTGRES_DB=hello_django_prod
 
-  nginx:
-    # build:
-    #   context: ./nginx
-    #   cache_from:
-    #     - "${NGINX_IMAGE}"
-    image: "${NGINX_IMAGE}"
+  # nginx:
+  #   # build:
+  #   #   context: ./nginx
+  #   #   cache_from:
+  #   #     - "${NGINX_IMAGE}"
+  #   image: "${NGINX_IMAGE}"
+  #   volumes:
+  #     - static_volume:/home/app/web/staticfiles
+  #     - media_volume:/home/app/web/mediafiles
+  #   ports:
+  #     - 80:80
+  #   depends_on:
+  #     - web
+
+  nginx-proxy:
+    container_name: nginx-proxy
+    image: "${NGINX_PROXY_IMAGE}"
+    restart: always
     volumes:
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/mediafiles
+      - vhost:/etc/nginx/vhost.d
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     ports:
       - 80:80
     depends_on:
@@ -55,3 +71,4 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
+  vhost:
