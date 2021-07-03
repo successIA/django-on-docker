@@ -32,5 +32,6 @@ def visitor_ip_address(request):
     # remote_host = request.META['REMOTE_HOST']
     # http_host = request.META['HTTP_HOST']
 
-    msg = f'Your ip is {ip}. Meta: {request.META}'
+    secure_str = 'secure' if request.is_secure() else 'insecure'
+    msg = f'Your ip is {ip}. Your connection is {secure_str} Meta: {request.META}'
     return HttpResponse(msg)
