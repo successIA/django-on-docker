@@ -5,9 +5,6 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile.prod
-      cache_from:
-        - "${WEB_IMAGE}"
-    image: "${WEB_IMAGE}"
     command: gunicorn hello_django.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/app/web/staticfiles
@@ -25,6 +22,9 @@ services:
       - SQL_HOST=db
       - SQL_PORT=5432
       - DATABASE=postgres
+      - VIRTUAL_HOST=web.local
+      - VIRTUAL_PORT=8000
+      - CERT_NAME=server
 
     depends_on:
       - db
@@ -41,17 +41,16 @@ services:
     container_name: nginx-proxy
     build:
       context: ./nginx_proxy
-      cache_from:
-        - "${NGINX_PROXY_IMAGE}"
-    image: "${NGINX_PROXY_IMAGE}"
     restart: always
     volumes:
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/mediafiles
+      - ./nginx_proxy/certs:/etc/nginx/certs
       - vhost:/etc/nginx/vhost.d
       - /var/run/docker.sock:/tmp/docker.sock:ro
     ports:
       - 80:80
+      - 443:443
     depends_on:
       - web
 

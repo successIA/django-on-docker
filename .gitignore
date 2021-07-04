@@ -155,3 +155,5 @@ db.json
 .vscode
 .history
 
+
+nginx_proxy/certs
